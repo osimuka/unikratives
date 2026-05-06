@@ -1,7 +1,9 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { motion } from "motion/react";
+import { FormEvent, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import {
   FaChartLine,
@@ -17,63 +19,13 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 
-import CASHEW_NUT from "./../../public/cashew.png";
 import CASHEWNUT from "./../../public/cashew_nut.jpg";
-import CHIN_CHIN from "./../../public/chin_chin.jpg";
 import GROUND_NUT from "./../../public/ground_nut.jpg";
-import KILISHI_BOX from "./../../public/kilishi_box.jpg";
-import KILISHI from "./../../public/kilishi.jpg";
-import KULI_KULI from "./../../public/kuli_kuli.jpg";
-import PEA_NUT from "./../../public/pea_nut.jpg";
-import PLANTAINCHIPS from "./../../public/kulikuli.jpg";
-import KULIKULI from "./../../public/kulikuli.jpg";
-import PLANTAIN_CHIPS from "./../../public/plantain_chips.jpg";
+import { ThemeToggle } from "./theme-toggle";
+import products from "../../data/products";
 
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const products = [
-  {
-    name: "Kilishi",
-    description: "Premium sun-dried spiced beef, finished for modern retail shelves.",
-    image: KILISHI,
-    price: "NGN 2,500",
-    variants: ["Original", "Spicy"],
-  },
-  {
-    name: "Kuli Kuli",
-    description: "Crunchy groundnut snack with clean packaging and consistent quality.",
-    image: KULIKULI,
-    price: "NGN 1,800",
-    variants: ["Classic"],
-  },
-  {
-    name: "Plantain Chips",
-    description: "Crisp sliced plantains, naturally sweet and ready for distribution.",
-    image: PLANTAIN_CHIPS,
-    price: "NGN 2,000",
-    variants: ["Sweet", "Savory"],
-  },
-  {
-    name: "Roasted Cashew",
-    description: "Premium cashews sourced from local farms and roasted in small batches.",
-    image: CASHEW_NUT,
-    price: "NGN 3,500",
-    variants: ["Salted"],
-  },
-  {
-    name: "Roasted Peanuts",
-    description: "Fresh roasted peanuts with a familiar Nigerian taste and shelf-ready finish.",
-    image: PEA_NUT,
-    price: "NGN 1,500",
-    variants: ["Salted"],
-  },
-  {
-    name: "Chin Chin",
-    description: "Crunchy fried dough snacks built for everyday enjoyment and gifting.",
-    image: CHIN_CHIN,
-    price: "NGN 2,200",
-    variants: ["Traditional", "Coconut"],
-  },
-];
 
 const features = [
   {
@@ -123,13 +75,92 @@ const testimonials = [
   },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 },
-};
+const stats = [
+  {
+    value: 40,
+    suffix: "%",
+    label: "Projected sales lift",
+  },
+  {
+    value: 20,
+    suffix: "%",
+    label: "Waste reduction goal",
+  },
+  {
+    value: 5,
+    prefix: "$",
+    suffix: "B",
+    label: "Snack market signal",
+  },
+];
 
 export default function Home() {
+  const mainRef = useRef<HTMLElement>(null);
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+
+  useGSAP(
+    () => {
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (prefersReducedMotion) {
+        gsap.set(".hero-reveal, .hero-media, .scroll-reveal", {
+          clearProps: "all",
+          opacity: 1,
+        });
+
+        gsap.utils.toArray<HTMLElement>(".stat-value").forEach((element) => {
+          const value = Number(element.dataset.value ?? 0);
+          element.textContent = `${element.dataset.prefix ?? ""}${value}${element.dataset.suffix ?? ""}`;
+        });
+
+        return;
+      }
+
+      gsap
+        .timeline({ defaults: { duration: 0.75, ease: "power3.out" } })
+        .from(".hero-reveal", { opacity: 0, y: 24, stagger: 0.12 })
+        .from(".hero-media", { opacity: 0, scale: 0.96, duration: 0.8 }, "-=0.45");
+
+      gsap.utils.toArray<HTMLElement>(".scroll-reveal").forEach((element) => {
+        gsap.from(element, {
+          opacity: 0,
+          y: 24,
+          duration: 0.75,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: element,
+            start: "top 85%",
+            once: true,
+          },
+        });
+      });
+
+      gsap.utils.toArray<HTMLElement>(".stat-value").forEach((element) => {
+        const counter = { value: 0 };
+        const target = Number(element.dataset.value ?? 0);
+        const prefix = element.dataset.prefix ?? "";
+        const suffix = element.dataset.suffix ?? "";
+
+        gsap.to(counter, {
+          value: target,
+          duration: 1.45,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: "[data-stats]",
+            start: "top 80%",
+            once: true,
+          },
+          onUpdate: () => {
+            element.textContent = `${prefix}${Math.round(counter.value)}${suffix}`;
+          },
+          onComplete: () => {
+            element.textContent = `${prefix}${target}${suffix}`;
+          },
+        });
+      });
+    },
+    { scope: mainRef },
+  );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -143,8 +174,8 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-950">
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/90 backdrop-blur-xl">
+    <main ref={mainRef} className="min-h-screen bg-stone-50 text-stone-950 transition-colors dark:bg-stone-950 dark:text-stone-50">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-stone-950/88">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
           <a href="#home" className="flex items-center gap-3" aria-label="Unikrative home">
             <span className="grid size-11 place-items-center rounded-lg bg-emerald-700 text-white">
@@ -152,43 +183,44 @@ export default function Home() {
             </span>
             <span>
               <span className="block text-base font-semibold leading-tight">Unikrative C-enterprise</span>
-              <span className="block text-xs font-medium uppercase tracking-[0.18em] text-amber-700">
+              <span className="block text-xs font-medium uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">
                 U-Agro Snacks
               </span>
             </span>
           </a>
 
-          <div className="hidden items-center gap-7 text-sm font-medium text-stone-700 md:flex">
-            <a href="#about" className="transition hover:text-emerald-700">About</a>
-            <a href="#products" className="transition hover:text-emerald-700">Products</a>
-            <a href="#impact" className="transition hover:text-emerald-700">Impact</a>
-            <a href="#contact" className="rounded-lg bg-stone-950 px-5 py-2.5 text-white transition hover:bg-emerald-800">
-              Contact
-            </a>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-7 text-sm font-medium text-stone-700 md:flex dark:text-stone-300">
+              <a href="#about" className="transition hover:text-emerald-700 dark:hover:text-emerald-300">About</a>
+              <a href="#products" className="transition hover:text-emerald-700 dark:hover:text-emerald-300">Products</a>
+              <a href="#impact" className="transition hover:text-emerald-700 dark:hover:text-emerald-300">Impact</a>
+              <a href="#contact" className="rounded-lg bg-stone-950 px-5 py-2.5 text-white transition hover:bg-emerald-800 dark:bg-stone-100 dark:text-stone-950 dark:hover:bg-emerald-300">
+                Contact
+              </a>
+            </div>
+            <ThemeToggle />
           </div>
         </nav>
       </header>
 
-      <section id="home" className="relative overflow-hidden bg-white pt-28">
+      <section id="home" className="relative overflow-hidden bg-white pt-28 dark:bg-stone-950">
         <div className="mx-auto grid min-h-[calc(100vh-64px)] max-w-7xl items-center gap-12 px-5 pb-16 lg:grid-cols-[1fr_0.88fr] lg:px-8">
-          <motion.div initial="hidden" animate="visible" transition={{ staggerChildren: 0.12 }}>
-            <motion.p
-              variants={fadeUp}
-              className="mb-5 inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800"
+          <div>
+            <p
+              className="hero-reveal mb-5 inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200"
             >
               <FaSeedling aria-hidden /> From farm to flavor
-            </motion.p>
-            <motion.h1
-              variants={fadeUp}
-              className="max-w-4xl text-5xl font-semibold leading-[1.02] tracking-normal text-stone-950 sm:text-6xl lg:text-7xl"
+            </p>
+            <h1
+              className="hero-reveal max-w-4xl text-5xl font-semibold leading-[1.02] tracking-normal text-stone-950 sm:text-6xl lg:text-7xl dark:text-stone-50"
             >
               Empowering farmers. Elevating Nigerian snacks.
-            </motion.h1>
-            <motion.p variants={fadeUp} className="mt-6 max-w-2xl text-lg leading-8 text-stone-650">
+            </h1>
+            <p className="hero-reveal mt-6 max-w-2xl text-lg leading-8 text-stone-650 dark:text-stone-300">
               Unikrative C-enterprise transforms familiar local snacks into shelf-ready products through
               better sourcing, sustainable packaging, and market access for rural producers.
-            </motion.p>
-            <motion.div variants={fadeUp} className="mt-9 flex flex-col gap-3 sm:flex-row">
+            </p>
+            <div className="hero-reveal mt-9 flex flex-col gap-3 sm:flex-row">
               <a
                 href="#products"
                 className="inline-flex h-12 items-center justify-center rounded-lg bg-emerald-700 px-6 font-semibold text-white transition hover:bg-emerald-800"
@@ -197,57 +229,50 @@ export default function Home() {
               </a>
               <a
                 href="https://wa.me/qr/A32AQ3KXCHYNI1"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-6 font-semibold text-stone-900 transition hover:border-emerald-700 hover:text-emerald-800"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-6 font-semibold text-stone-900 transition hover:border-emerald-700 hover:text-emerald-800 dark:border-white/10 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-emerald-400 dark:hover:text-emerald-300"
               >
                 <FaWhatsapp aria-hidden /> WhatsApp us
               </a>
-            </motion.div>
-            <motion.div variants={fadeUp} className="mt-12 grid max-w-2xl grid-cols-3 gap-4 border-t border-stone-200 pt-8">
-              {[
-                ["40%", "Projected sales lift"],
-                ["20%", "Waste reduction goal"],
-                ["$5B", "Snack market signal"],
-              ].map(([value, label]) => (
-                <div key={label}>
-                  <strong className="block text-3xl font-semibold text-emerald-700">{value}</strong>
-                  <span className="mt-1 block text-sm leading-5 text-stone-600">{label}</span>
+            </div>
+            <div data-stats className="hero-reveal mt-12 grid max-w-2xl grid-cols-3 gap-4 border-t border-stone-200 pt-8 dark:border-white/10">
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <strong
+                    className="stat-value block text-3xl font-semibold text-emerald-700 dark:text-emerald-300"
+                    data-prefix={stat.prefix}
+                    data-suffix={stat.suffix}
+                    data-value={stat.value}
+                  >
+                    {`${stat.prefix ?? ""}0${stat.suffix}`}
+                  </strong>
+                  <span className="mt-1 block text-sm leading-5 text-stone-600 dark:text-stone-400">{stat.label}</span>
                 </div>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7 }}
-            className="relative"
-          >
+          <div className="hero-media relative">
             <Image
               src={CASHEWNUT}
               alt="Packaged Nigerian snacks and agricultural produce"
               width={1100}
               height={1300}
               priority
-              className="aspect-[4/5] w-full rounded-lg object-cover shadow-2xl shadow-stone-950/15"
+              className="aspect-[4/5] w-full rounded-lg object-cover shadow-2xl shadow-stone-950/15 dark:shadow-black/40"
             />
-            <div className="absolute bottom-5 left-5 right-5 rounded-lg bg-white/92 p-5 shadow-xl backdrop-blur">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-amber-700">Built for better markets</p>
-              <p className="mt-2 text-lg font-semibold text-stone-950">
+            <div className="absolute bottom-5 left-5 right-5 rounded-lg bg-white/92 p-5 shadow-xl backdrop-blur dark:bg-stone-950/82">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-amber-700 dark:text-amber-300">Built for better markets</p>
+              <p className="mt-2 text-lg font-semibold text-stone-950 dark:text-stone-50">
                 Clean packaging, reliable quality, and a farmer-connected supply chain.
               </p>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       <section id="about" className="px-5 py-24 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1fr] lg:items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="overflow-hidden rounded-lg shadow-xl shadow-stone-950/10"
-          >
+          <div className="scroll-reveal overflow-hidden rounded-lg shadow-xl shadow-stone-950/10 dark:shadow-black/35">
             <Image
               src={GROUND_NUT}
               alt="Entrepreneur reviewing agribusiness growth plans"
@@ -255,26 +280,34 @@ export default function Home() {
               height={780}
               className="aspect-[5/4] w-full object-cover"
             />
-          </motion.div>
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} transition={{ staggerChildren: 0.1 }}>
-            <motion.p variants={fadeUp} className="section-kicker">Founder story</motion.p>
-            <motion.h2 variants={fadeUp} className="section-title">Led by lived experience in farming and finance.</motion.h2>
-            <motion.p variants={fadeUp} className="section-copy">
-              Founder John Uka O. combines accounting, startup experience, and agribusiness training with a
-              personal understanding of the market barriers rural farmers face.
-            </motion.p>
-            <motion.p variants={fadeUp} className="section-copy mt-4">
-              U-Agro Snacks is his answer: a brand that turns local agricultural produce into competitive
-              products while giving farmers fairer access to buyers, retailers, and export opportunities.
-            </motion.p>
-            <motion.blockquote variants={fadeUp} className="mt-8 rounded-lg border-l-4 border-emerald-700 bg-white p-6 text-lg font-medium leading-8 shadow-sm">
-              Sustainable change starts when farmers earn what their work is truly worth.
-            </motion.blockquote>
-          </motion.div>
+          </div>
+          <div>
+            <p className="scroll-reveal section-kicker">Founder story</p>
+            <h2 className="scroll-reveal section-title">Led by lived experience in farming and finance.</h2>
+            <p className="scroll-reveal section-copy">
+              John Uka O. is a passionate entrepreneur with a background in Accounting from Michael
+              Okpara University of Agriculture, Umudike. As an executive founding member of the MOUAU
+              Entrepreneurship Club, he honed his passion for agriculture while leveraging his financial
+              expertise to drive business success.
+            </p>
+            <p className="scroll-reveal section-copy mt-4">
+              With more than two years in the financial sector, four years in startups, and extensive
+              agribusiness training, he has developed strong financial management and leadership skills.
+              Growing up with farmer parents, he witnessed the struggles of rural farmers in accessing fair
+              markets. This inspired him to start U-Agro Services, an innovation tackling post-harvest losses
+              through eco-friendly packaging and innovative sales strategies—boosting sales by 40% and
+              reducing waste by 20%.
+            </p>
+            <blockquote className="scroll-reveal mt-8 rounded-lg border-l-4 border-emerald-700 bg-white p-6 text-lg font-medium leading-8 shadow-sm dark:border-emerald-400 dark:bg-stone-900 dark:text-stone-100">
+              His mission is to transform local agricultural products into globally competitive goods, ensuring
+              farmers earn what they truly deserve. Through entrepreneurship, I am committed to driving
+              sustainable change in Nigeria’s agribusiness sector.
+            </blockquote>
+          </div>
         </div>
       </section>
 
-      <section id="impact" className="bg-white px-5 py-24 lg:px-8">
+      <section id="impact" className="bg-white px-5 py-24 lg:px-8 dark:bg-stone-900">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
             <p className="section-kicker">What makes us different</p>
@@ -282,17 +315,14 @@ export default function Home() {
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <motion.article
+              <article
                 key={feature.title}
-                initial={{ opacity: 0, y: 22 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="rounded-lg border border-stone-200 bg-stone-50 p-6"
+                className="scroll-reveal rounded-lg border border-stone-200 bg-stone-50 p-6 dark:border-white/10 dark:bg-stone-950"
               >
-                <feature.icon aria-hidden className="size-7 text-emerald-700" />
+                <feature.icon aria-hidden className="size-7 text-emerald-700 dark:text-emerald-300" />
                 <h3 className="mt-5 text-xl font-semibold">{feature.title}</h3>
-                <p className="mt-3 leading-7 text-stone-650">{feature.text}</p>
-              </motion.article>
+                <p className="mt-3 leading-7 text-stone-650 dark:text-stone-300">{feature.text}</p>
+              </article>
             ))}
           </div>
         </div>
@@ -305,19 +335,16 @@ export default function Home() {
               <p className="section-kicker">Product range</p>
               <h2 className="section-title">Premium snacks with authentic Nigerian roots.</h2>
             </div>
-            <a href="#contact" className="inline-flex h-12 items-center justify-center rounded-lg bg-stone-950 px-6 font-semibold text-white transition hover:bg-emerald-800">
+            <a href="#contact" className="inline-flex h-12 items-center justify-center rounded-lg bg-stone-950 px-6 font-semibold text-white transition hover:bg-emerald-800 dark:bg-stone-100 dark:text-stone-950 dark:hover:bg-emerald-300">
               Wholesale enquiry
             </a>
           </div>
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (
-              <motion.article
-                key={product.name}
-                initial={{ opacity: 0, y: 22 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+              <article
+                key={product.id}
+                className="scroll-reveal overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-stone-900 dark:hover:shadow-black/35"
               >
                 <Image
                   src={product.image}
@@ -329,13 +356,13 @@ export default function Home() {
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-4">
                     <h3 className="text-2xl font-semibold">{product.name}</h3>
-                    <span className="whitespace-nowrap text-sm font-bold text-emerald-700">{product.price}</span>
+                    <span className="whitespace-nowrap text-sm font-bold text-emerald-700 dark:text-emerald-300">{product.price}</span>
                   </div>
-                  <p className="mt-3 min-h-14 leading-7 text-stone-650">{product.description}</p>
+                  <p className="mt-3 min-h-14 leading-7 text-stone-650 dark:text-stone-300">{product.description}</p>
                   <div className="mt-5 flex items-center justify-between gap-4">
                     <div className="flex flex-wrap gap-2">
                       {product.variants.map((variant) => (
-                        <span key={variant} className="rounded-lg bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+                        <span key={variant} className="rounded-lg bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-300/10 dark:text-amber-200">
                           {variant}
                         </span>
                       ))}
@@ -347,28 +374,28 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              </motion.article>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-emerald-900 px-5 py-24 text-white lg:px-8">
+      <section className="bg-emerald-900 px-5 py-24 text-white lg:px-8 dark:bg-emerald-950">
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-2">
-          <div className="rounded-lg border border-white/15 bg-white/8 p-8">
+          <div className="rounded-lg border border-white/15 bg-white/8 p-8 dark:bg-white/6">
             <FaHandHoldingHeart aria-hidden className="size-9 text-amber-300" />
             <h2 className="mt-6 text-3xl font-semibold">Our mission</h2>
             <p className="mt-4 text-lg leading-8 text-emerald-50">
-              Modernize agriculture, bridge market gaps, and help small-scale farmers turn local produce
-              into products with stronger commercial value.
+              Unikrative C-Enterprise&apos;s mission is to modernize agriculture and empower rural small-scale
+              farmers, bridge market gaps, and showcase Nigeria’s agricultural wealth to a global audience.
             </p>
           </div>
-          <div className="rounded-lg border border-white/15 bg-white/8 p-8">
+          <div className="rounded-lg border border-white/15 bg-white/8 p-8 dark:bg-white/6">
             <FaGlobeAfrica aria-hidden className="size-9 text-amber-300" />
             <h2 className="mt-6 text-3xl font-semibold">Our vision</h2>
             <p className="mt-4 text-lg leading-8 text-emerald-50">
-              Become a leading Nigerian snack brand known for quality, creativity, sustainability, and
-              global-ready presentation.
+              To become a leading brand delivering innovative, high-quality local snack products that meet
+              global standards while promoting Nigerian creativity and value.
             </p>
           </div>
         </div>
@@ -393,7 +420,7 @@ export default function Home() {
                   alt={`U-Agro agricultural journey image ${index + 1}`}
                   width={700}
                   height={700}
-                  className="aspect-square rounded-lg object-cover shadow-sm"
+                  className="aspect-square rounded-lg object-cover shadow-sm dark:shadow-black/25"
                 />
               ))}
             </div>
@@ -401,7 +428,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-white px-5 py-24 lg:px-8">
+      <section className="bg-white px-5 py-24 lg:px-8 dark:bg-stone-900">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
             <p className="section-kicker">Market feedback</p>
@@ -409,16 +436,16 @@ export default function Home() {
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {testimonials.map((testimonial) => (
-              <article key={testimonial.name} className="rounded-lg border border-stone-200 bg-stone-50 p-6">
+              <article key={testimonial.name} className="rounded-lg border border-stone-200 bg-stone-50 p-6 dark:border-white/10 dark:bg-stone-950">
                 <div className="mb-5 flex text-amber-500">
                   {Array.from({ length: 5 }).map((_, index) => (
                     <FaStar key={index} aria-hidden className="size-4" />
                   ))}
                 </div>
-                <p className="text-lg leading-8 text-stone-800">{testimonial.quote}</p>
-                <div className="mt-6 border-t border-stone-200 pt-5">
+                <p className="text-lg leading-8 text-stone-800 dark:text-stone-200">{testimonial.quote}</p>
+                <div className="mt-6 border-t border-stone-200 pt-5 dark:border-white/10">
                   <p className="font-semibold">{testimonial.name}</p>
-                  <p className="text-sm text-stone-600">{testimonial.role}</p>
+                  <p className="text-sm text-stone-600 dark:text-stone-400">{testimonial.role}</p>
                 </div>
               </article>
             ))}
@@ -458,9 +485,9 @@ export default function Home() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="rounded-lg border border-stone-200 bg-white p-6 shadow-xl shadow-stone-950/5 md:p-8">
+          <form onSubmit={handleSubmit} className="rounded-lg border border-stone-200 bg-white p-6 shadow-xl shadow-stone-950/5 md:p-8 dark:border-white/10 dark:bg-stone-900 dark:shadow-black/30">
             <div className="grid gap-5 sm:grid-cols-2">
-              <label className="grid gap-2 text-sm font-semibold text-stone-800">
+              <label className="grid gap-2 text-sm font-semibold text-stone-800 dark:text-stone-200">
                 Full name
                 <input
                   required
@@ -470,7 +497,7 @@ export default function Home() {
                   placeholder="Your name"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-semibold text-stone-800">
+              <label className="grid gap-2 text-sm font-semibold text-stone-800 dark:text-stone-200">
                 Email address
                 <input
                   required
@@ -482,7 +509,7 @@ export default function Home() {
                 />
               </label>
             </div>
-            <label className="mt-5 grid gap-2 text-sm font-semibold text-stone-800">
+            <label className="mt-5 grid gap-2 text-sm font-semibold text-stone-800 dark:text-stone-200">
               Message
               <textarea
                 required
@@ -499,7 +526,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="bg-stone-950 px-5 py-12 text-white lg:px-8">
+      <footer className="bg-stone-950 px-5 py-12 text-white lg:px-8 dark:bg-black">
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_0.7fr_0.7fr]">
           <div>
             <div className="flex items-center gap-3">
