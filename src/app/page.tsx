@@ -6,14 +6,12 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import {
-  FaChartLine,
   FaEnvelope,
   FaFacebookF,
   FaGlobeAfrica,
   FaHandHoldingHeart,
   FaInstagram,
   FaLeaf,
-  FaRecycle,
   FaSeedling,
   FaStar,
   FaWhatsapp,
@@ -23,76 +21,9 @@ import CASHEWNUT from "./../../public/cashew_nut.jpg";
 import GROUND_NUT from "./../../public/ground_nut.jpg";
 import { ThemeToggle } from "./theme-toggle";
 import products from "../../data/products";
+import { features, galleryImages, stats, testimonials } from "@/data/page";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
-
-
-const features = [
-  {
-    icon: FaRecycle,
-    title: "Sustainable Packaging",
-    text: "Biodegradable packs designed to extend shelf life and reduce food waste.",
-  },
-  {
-    icon: FaChartLine,
-    title: "Retail Growth",
-    text: "A cleaner brand system and consistent supply model for stores and distributors.",
-  },
-  {
-    icon: FaGlobeAfrica,
-    title: "Global Standards",
-    text: "Local Nigerian snacks positioned for export conversations and modern shelves.",
-  },
-  {
-    icon: FaHandHoldingHeart,
-    title: "Farmer First",
-    text: "Direct market access that helps rural producers earn fairer, steadier returns.",
-  },
-];
-
-const galleryImages = [
-  "https://images.unsplash.com/photo-1595855759917-5e8e8001a0f8?w=700&h=700&fit=crop",
-  "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=700&h=700&fit=crop",
-  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&h=700&fit=crop",
-  "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=700&h=700&fit=crop",
-];
-
-const testimonials = [
-  {
-    quote: "The quality feels intentional. These are Nigerian snacks presented like a real export brand.",
-    name: "Amaka Johnson",
-    role: "Food Blogger, Lagos",
-  },
-  {
-    quote: "The packaging, shelf life, and product consistency make the range easy to recommend.",
-    name: "David Okonkwo",
-    role: "Retail Partner, Abuja",
-  },
-  {
-    quote: "It is exactly the kind of product line buyers want: authentic, clear, and reliable.",
-    name: "Sarah Williams",
-    role: "Export Buyer, UK",
-  },
-];
-
-const stats = [
-  {
-    value: 40,
-    suffix: "%",
-    label: "Projected sales lift",
-  },
-  {
-    value: 20,
-    suffix: "%",
-    label: "Waste reduction goal",
-  },
-  {
-    value: 5,
-    prefix: "$",
-    suffix: "B",
-    label: "Snack market signal",
-  },
-];
 
 export default function Home() {
   const mainRef = useRef<HTMLElement>(null);
@@ -258,7 +189,7 @@ export default function Home() {
               width={1100}
               height={1300}
               priority
-              className="aspect-[4/5] w-full rounded-lg object-cover shadow-2xl shadow-stone-950/15 dark:shadow-black/40"
+              className="aspect-4/5 w-full rounded-lg object-cover shadow-2xl shadow-stone-950/15 dark:shadow-black/40"
             />
             <div className="absolute bottom-5 left-5 right-5 rounded-lg bg-white/92 p-5 shadow-xl backdrop-blur dark:bg-stone-950/82">
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-amber-700 dark:text-amber-300">Built for better markets</p>
@@ -278,7 +209,7 @@ export default function Home() {
               alt="Entrepreneur reviewing agribusiness growth plans"
               width={1000}
               height={780}
-              className="aspect-[5/4] w-full object-cover"
+              className="aspect-5/4 w-full object-cover"
             />
           </div>
           <div>
@@ -351,7 +282,7 @@ export default function Home() {
                   alt={product.name}
                   width={900}
                   height={900}
-                  className="aspect-[4/3] w-full object-cover"
+                  className="aspect-4/3 w-full object-cover"
                 />
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-4">
@@ -415,8 +346,8 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-4">
               {galleryImages.map((image, index) => (
                 <Image
-                  key={image}
-                  src={image}
+                  key={image.id}
+                  src={image.url}
                   alt={`U-Agro agricultural journey image ${index + 1}`}
                   width={700}
                   height={700}
