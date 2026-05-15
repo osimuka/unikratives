@@ -18,7 +18,7 @@ import {
 } from "react-icons/fa";
 
 import CASHEWNUT from "./../../public/cashew_nut.jpg";
-import GROUND_NUT from "./../../public/ground_nut.jpg";
+import FOUNDER from "./../../public/unikrative.jpg";
 import { ThemeToggle } from "./theme-toggle";
 import products from "../../data/products";
 import { features, galleryImages, stats, testimonials } from "@/data/page";
@@ -203,13 +203,13 @@ export default function Home() {
 
       <section id="about" className="px-5 py-24 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1fr] lg:items-center">
-          <div className="scroll-reveal overflow-hidden rounded-lg shadow-xl shadow-stone-950/10 dark:shadow-black/35">
+          <div className="scroll-reveal hidden md:block overflow-hidden rounded-lg shadow-xl shadow-stone-950/10 dark:shadow-black/35">
             <Image
-              src={GROUND_NUT}
+              src={FOUNDER}
               alt="Entrepreneur reviewing agribusiness growth plans"
               width={1000}
               height={780}
-              className="aspect-5/4 w-full object-cover"
+              className="w-full object-cover"
             />
           </div>
           <div>
@@ -221,6 +221,15 @@ export default function Home() {
               Entrepreneurship Club, he honed his passion for agriculture while leveraging his financial
               expertise to drive business success.
             </p>
+            <div className="scroll-reveal my-10 md:hidden block overflow-hidden rounded-lg shadow-xl shadow-stone-950/10 dark:shadow-black/35">
+              <Image
+                src={FOUNDER}
+                alt="Entrepreneur reviewing agribusiness growth plans"
+                width={1000}
+                height={780}
+                className="w-full object-cover"
+              />
+            </div>
             <p className="scroll-reveal section-copy mt-4">
               With more than two years in the financial sector, four years in startups, and extensive
               agribusiness training, he has developed strong financial management and leadership skills.

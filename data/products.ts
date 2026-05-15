@@ -1,4 +1,4 @@
-import CASHEW_NUT from "../public/cashew.png";
+// import CASHEW_NUT from "../public/cashew.png";
 import CASHEWNUT from "../public/cashew_nut.jpg";
 import CHIN_CHIN from "../public/chin_chin.jpg";
 import GROUND_NUT from "../public/ground_nut.jpg";
@@ -32,8 +32,8 @@ const products = [
   {
     id: 40, name: "Roasted Cashew",
     description: "Premium cashews sourced from local farms and roasted in small batches.",
-    image: CASHEW_NUT,
-    price: "NGN 3,500",
+    image: CASHEWNUT,
+    price: "NGN 2,000",
     variants: ["Salted"],
   },
   {
