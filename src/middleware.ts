@@ -7,9 +7,15 @@ export function middleware(request: NextRequest) {
     const proto = request.headers.get('x-forwarded-proto');
 
     if (proto !== 'https') {
-      const url = new URL(request.url);
-      url.protocol = 'https:';
-      return NextResponse.redirect(url, { status: 301 });
+      const forwardedHost = request.headers.get('x-forwarded-host');
+      const host = forwardedHost ?? request.headers.get('host');
+
+      if (host) {
+        const { pathname, search } = new URL(request.url);
+        return NextResponse.redirect(`https://${host}${pathname}${search}`, {
+          status: 301,
+        });
+      }
     }
   }
 
