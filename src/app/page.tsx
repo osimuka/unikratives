@@ -12,7 +12,6 @@ import {
   FaHandHoldingHeart,
   FaInstagram,
   FaLeaf,
-  FaSeedling,
   FaStar,
   FaWhatsapp,
 } from "react-icons/fa";
@@ -22,6 +21,7 @@ import FOUNDER from "./../../public/unikrative.jpg";
 import { ThemeToggle } from "./theme-toggle";
 import products from "../../data/products";
 import { features, galleryImages, stats, testimonials } from "@/data/page";
+import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -140,7 +140,7 @@ export default function Home() {
             <p
               className="hero-reveal mb-5 inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200"
             >
-              <FaSeedling aria-hidden /> From farm to flavor
+              Premium snacks with authentic Nigerian roots. From farm to flavor
             </p>
             <h1
               className="hero-reveal max-w-4xl text-5xl font-semibold leading-[1.02] tracking-normal text-stone-950 sm:text-6xl lg:text-7xl dark:text-stone-50"
@@ -313,6 +313,17 @@ export default function Home() {
                       ))}
                     </div>
                   </div>
+                </div>
+                <div className="grid place-items-start border-t border-stone-200 p-6 text-center dark:border-white/10">
+                  <a
+                    href={product.linkToProduct}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex justify-center items-center gap-4 rounded-lg bg-emerald-700 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-black"
+                  >
+                    View Product
+                    <FaArrowUpRightFromSquare aria-hidden />
+                  </a>
                 </div>
               </article>
             ))}
