@@ -30,7 +30,7 @@ const products = [
     image: PLANTAIN_CHIPS,
     price: "NGN 2,000",
     variants: ["Sweet", "Savory"],
-    linkToProduct: "https://selar.com/150vj71240"
+    linkToProduct: "https://selar.com/381dh38111"
   },
   {
     id: 40, name: "Roasted Cashew",
@@ -62,7 +62,7 @@ const products = [
     image: GROUND_NUT,
     price: "NGN 1,500",
     variants: ["Salted"],
-    linkToProduct: ""
+    linkToProduct: "https://selar.com/150vj71240"
   },
 
 ];
